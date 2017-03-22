@@ -34,5 +34,5 @@ git commit -m "$PROJECT Doxygen pages update $DATE" # todo
 
 ######## important: don't echo token
 set +x
-git push --force "https://${GH_REPO_TOKEN}@github.com/ihnorton/slicerapi" gh-pages
+git push --force "https://${GH_REPO_TOKEN}@github.com/ihnorton/slicerapi" gh-pages > /dev/null 2>&1
 ########
