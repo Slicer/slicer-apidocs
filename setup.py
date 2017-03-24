@@ -25,11 +25,13 @@ setup(
 
     version='0.1.0',
 
-    py_modules=['publish_apidocs'],
+    packages=['slicer_apidocs_builder'],
+    include_package_data=True,
+    zip_safe=False,
 
     entry_points={
         'console_scripts': [
-            'slicer-apidocs-builder = publish_apidocs:main',
+            'slicer-apidocs-builder = slicer_apidocs_builder:main',
         ]},
 
     license="Slicer",

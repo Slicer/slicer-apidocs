@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import argparse
 import errno
@@ -51,7 +51,7 @@ def working_dir(directory=None, make_directory=False):
     os.chdir(old_cwd)
 
 
-def execute(cmd, capture=False, fatal=True):
+def execute(cmd, capture=False):
     print("\n> %s\n" % cmd)
     check_func = subprocess.check_call
     extra_kwargs = {}
