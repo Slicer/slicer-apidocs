@@ -142,7 +142,7 @@ def main():
     with working_dir(slicer_src_dir):
 
         # Checkout expected version
-        execute("git reset --hard %s" % tag if tag else "origin/" + branch)
+        execute("git reset --hard %s" % (tag if tag else "origin/" + branch))
 
         # Get commit
         slicer_src_commit = execute("git rev-parse --short HEAD", capture=True)
