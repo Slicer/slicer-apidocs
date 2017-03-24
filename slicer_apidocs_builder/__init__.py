@@ -121,8 +121,9 @@ def cli():
     )
     parser.add_argument(
         "--publish-github-token", type=str,
+        default=os.environ.get("PUBLISH_GITHUB_TOKEN", None),
         help="GitHub Token allowing to publish generated documentation "
-             "(default: GITHUB_TOKEN env. variable)"
+             "(default: PUBLISH_GITHUB_TOKEN env. variable)"
     )
     args = parser.parse_args()
 
@@ -147,8 +148,10 @@ def cli():
     publish_github_url = "git://github.com/" + publish_github_repo
     publish_github_branch = args.publish_github_branch
     publish_github_token = args.publish_github_token
-    if not publish_github_token:
-        publish_github_token = os.environ.get("GITHUB_TOKEN", None)
+
+    publish_github_token_msg = "(missing)"
+    if publish_github_token:
+        publish_github_token_msg = "x" * len(publish_github_token) + " (obfuscated)"
 
     print("\nApidocs publishing parameters")
     print("  * username ....................: %s" % publish_github_username)
@@ -156,6 +159,7 @@ def cli():
     print("  * url .........................: %s" % publish_github_url)
     print("  * repo ........................: %s" % publish_github_repo)
     print("  * branch ......................: %s" % publish_github_branch)
+    print("  * github_token.................: %s" % publish_github_token_msg)
 
     # Directories
     slicer_src_dir = args.slicer_src_dir
