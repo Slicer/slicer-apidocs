@@ -137,11 +137,23 @@ def cli():
     if slicer_repo_tag:
         slicer_repo_branch = slicer_repo_tag
 
+    # Directories
+    slicer_repo_dir = args.slicer_repo_dir
+    directory = "%s-%s" % (slicer_repo_name.replace("/", "-"), slicer_repo_branch)
+    root_dir = tempfile.gettempdir()
+    apidocs_src_dir = root_dir + "/" + "%s-src" % directory
+    apidocs_build_dir = root_dir + "/" + "%s-build" % directory
+    if not slicer_repo_dir:
+        slicer_repo_dir = root_dir + "/" + directory
+
     print("\nApidocs building parameters")
     print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
     print("  * repo_name....................: %s" % slicer_repo_name)
     print("  * repo_branch .................: %s" % slicer_repo_branch)
     print("  * repo_tag ....................: %s" % slicer_repo_tag)
+    print("  * repo_dir ....................: %s" % slicer_repo_dir)
+    print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
+    print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
 
     # apidocs publishing
     publish_github_username = args.publish_github_username
@@ -163,20 +175,9 @@ def cli():
     print("  * branch ......................: %s" % publish_github_branch)
     print("  * github_token.................: %s" % publish_github_token_msg)
 
-    # Directories
-    slicer_repo_dir = args.slicer_repo_dir
-    directory = "%s-%s" % (slicer_repo_name.replace("/", "-"), slicer_repo_branch)
-    root_dir = tempfile.gettempdir()
-    apidocs_src_dir = root_dir + "/" + "%s-src" % directory
-    apidocs_build_dir = root_dir + "/" + "%s-build" % directory
-    if not slicer_repo_dir:
-        slicer_repo_dir = root_dir + "/" + directory
 
-    print("\nDirectories")
-    print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
-    print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
-    print("  * slicer_repo_dir .............: %s" % slicer_repo_dir)
 
+    # Summary
     skip_build = args.skip_build
     skip_build_reason = ""
 
