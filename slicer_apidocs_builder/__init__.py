@@ -80,6 +80,7 @@ def extract_slicer_version(slicer_src_dir):
 
 def cli():
     parser = argparse.ArgumentParser()
+    # Apidocs building parameters
     parser.add_argument(
         "--repo", type=str, default="Slicer/Slicer",
         help="Slicer repository to document (default: Slicer/Slicer)"
@@ -96,6 +97,11 @@ def cli():
         "--slicer-src-dir", type=str,
         help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
     )
+    parser.add_argument(
+        "--skip-build", action="store_true",
+        help="If specified, skip generation of HTML and reuse existing files."
+    )
+    # apidocs publishing parameters
     parser.add_argument(
         "--publish-github-username", type=str, default="Slicer Bot",
         help="Github name to associate with the commits (default: Slicer Bot)"
@@ -118,12 +124,9 @@ def cli():
         help="GitHub Token allowing to publish generated documentation "
              "(default: GITHUB_TOKEN env. variable)"
     )
-    parser.add_argument(
-        "--skip-build", action="store_true",
-        help="If specified, skip generation of HTML and reuse existing files."
-    )
     args = parser.parse_args()
 
+    # apidocs building parameters
     clone_url = "git://github.com/%s" % args.repo
     repo = args.repo
     branch = args.branch
@@ -131,6 +134,13 @@ def cli():
     if tag:
         branch = tag
 
+    print("\nApidocs building parameters")
+    print("  * clone_url ...................: %s" % clone_url)
+    print("  * repo ........................: %s" % repo)
+    print("  * branch ......................: %s" % branch)
+    print("  * tag .........................: %s" % tag)
+
+    # apidocs publishing
     publish_github_username = args.publish_github_username
     publish_github_useremail = args.publish_github_useremail
     publish_github_repo = args.publish_github_repo
@@ -140,13 +150,14 @@ def cli():
     if not publish_github_token:
         publish_github_token = os.environ.get("GITHUB_TOKEN", None)
 
-    print("\nApidocs repository")
+    print("\nApidocs publishing parameters")
     print("  * username ....................: %s" % publish_github_username)
     print("  * useremail ...................: %s" % publish_github_useremail)
     print("  * url .........................: %s" % publish_github_url)
     print("  * repo ........................: %s" % publish_github_repo)
     print("  * branch ......................: %s" % publish_github_branch)
 
+    # Directories
     slicer_src_dir = args.slicer_src_dir
     directory = "%s-%s" % (repo.replace("/", "-"), branch)
     root_dir = tempfile.gettempdir()
