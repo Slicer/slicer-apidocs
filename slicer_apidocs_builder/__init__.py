@@ -80,14 +80,40 @@ def extract_slicer_version(slicer_src_dir):
 
 def cli():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--repo", type=str, default="Slicer/Slicer")
-    parser.add_argument("--branch", type=str, default="master")
-    parser.add_argument("--tag", type=str)
-    parser.add_argument("--slicer-src-dir", type=str)
-    parser.add_argument("--publish-github-repo", type=str, default="slicer/apidocs.slicer.org")
-    parser.add_argument("--publish-github-branch", type=str, default="gh-pages")
-    parser.add_argument("--publish-github-token", type=str)
-    parser.add_argument("--skip-build", action="store_true")
+    parser.add_argument(
+        "--repo", type=str, default="Slicer/Slicer",
+        help="Slicer repository to document (default: Slicer/Slicer)"
+    )
+    parser.add_argument(
+        "--branch", type=str, default="master",
+        help="Slicer branch to document (default: master)"
+    )
+    parser.add_argument(
+        "--tag", type=str,
+        help="Slicer tag to document. If specified --branch is ignored."
+    )
+    parser.add_argument(
+        "--slicer-src-dir", type=str,
+        help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
+    )
+    parser.add_argument(
+        "--publish-github-repo", type=str, default="slicer/apidocs.slicer.org",
+        help="Github repository hosting generated HTML documentation "
+             "(default: slicer/apidocs.slicer.org)"
+    )
+    parser.add_argument(
+        "--publish-github-branch", type=str, default="gh-pages",
+        help="Github branch hosting generated HTML documentation (default: gh-pages)"
+    )
+    parser.add_argument(
+        "--publish-github-token", type=str,
+        help="GitHub Token allowing to publish generated documentation "
+             "(default: GITHUB_TOKEN env. variable)"
+    )
+    parser.add_argument(
+        "--skip-build", action="store_true",
+        help="If specified, skip generation of HTML and reuse existing files."
+    )
     args = parser.parse_args()
 
     clone_url = "git://github.com/%s" % args.repo

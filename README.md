@@ -2,13 +2,13 @@
 
 This project allows to generate and publish the Slicer API documentation. See http://apidocs.slicer.org.
 
-# builder script
+# builder cli
 
-The ``publish_apidocs.py`` script has 3 main steps:
+The ``slicer-apidocs-builder`` cli has 3 main steps:
 
 * checkout Slicer source code
 * build doxygen documentation
-* publish generated html pages into [Slicer/apidocs.slicer.org@apidocs](https://github.com/Slicer/apidocs.slicer.org) branch.
+* publish generated html pages into [Slicer/apidocs.slicer.org@gh-pages](https://github.com/Slicer/apidocs.slicer.org) branch.
 
 # supported cases
 
@@ -30,6 +30,38 @@ The `master` subpage is automatically updated each time the corresponding GitHub
 
 API documentation associated with a pull request is available under a subpage named after the pull request
 branch.
+
+# usage
+
+```bash
+usage: slicer-apidocs-builder [-h] [--repo REPO] [--branch BRANCH] [--tag TAG]
+                              [--slicer-src-dir SLICER_SRC_DIR]
+                              [--publish-github-repo PUBLISH_GITHUB_REPO]
+                              [--publish-github-branch PUBLISH_GITHUB_BRANCH]
+                              [--publish-github-token PUBLISH_GITHUB_TOKEN]
+                              [--skip-build]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --repo REPO           Slicer repository to document (default: Slicer/Slicer)
+  --branch BRANCH       Slicer branch to document (default: master)
+  --tag TAG             Slicer tag to document. If specified --branch is
+                        ignored.
+  --slicer-src-dir SLICER_SRC_DIR
+                        Slicer sources checkout to reuse. By default, checkout
+                        source in TEMP directory.
+  --publish-github-repo PUBLISH_GITHUB_REPO
+                        Github repository hosting generated HTML documentation
+                        (default: slicer/apidocs.slicer.org)
+  --publish-github-branch PUBLISH_GITHUB_BRANCH
+                        Github branch hosting generated HTML documentation
+                        (default: gh-pages)
+  --publish-github-token PUBLISH_GITHUB_TOKEN
+                        GitHub Token allowing to publish generated
+                        documentation (default: GITHUB_TOKEN env. variable)
+  --skip-build          If specified, skip generation of HTML and reuse
+                        existing files.
+```
 
 
 # license
