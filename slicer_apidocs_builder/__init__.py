@@ -158,18 +158,22 @@ def cli():
 
     with working_dir(apidocs_build_dir, make_directory=True):
 
-        # Configure the project
-        execute([
-            "cmake",
-            "-DSlicer_SOURCE_DIR:PATH=%s" % os.path.join(root_dir, slicer_src_dir),
-            "-DSlicer_VERSION:STRING=%s" % version,
-            #  "-G", "Ninja",
-            apidocs_src_dir
-        ])
+        def configure():
+            execute([
+                "cmake",
+                "-DSlicer_SOURCE_DIR:PATH=%s" % os.path.join(root_dir, slicer_src_dir),
+                "-DSlicer_VERSION:STRING=%s" % version,
+                #  "-G", "Ninja",
+                apidocs_src_dir
+            ])
 
-        # .. and build the doxygen documentation
-        if not skip_build:
+        def build():
             execute("cmake --build . --target doc")
+
+        configure()
+
+        if not skip_build:
+            build()
 
     with working_dir(apidocs_build_dir + "/Utilities/Doxygen"):
 
