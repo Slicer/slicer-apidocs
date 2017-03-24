@@ -131,9 +131,11 @@ def _apidocs_build_doxygen(
 
 def _apidocs_publish_doxygen(
         doxygen_output_dir=None,
-        publish_github_url=None, publish_github_branch=None,
+        publish_github_repo_url=None,
+        publish_github_repo_name=None,
+        publish_github_repo_branch=None,
         publish_github_username=None, publish_github_useremail=None,
-        publish_github_repo=None, publish_github_token=None,
+        publish_github_token=None,
         publish_github_subdir=None,
         skip_publish=False,
         slicer_repo_tag=None, slicer_repo_name=None, slicer_repo_head_sha=None  # For commit message
@@ -144,15 +146,15 @@ def _apidocs_publish_doxygen(
         if not os.path.exists("apidocs"):
             try:
                 execute("git clone --branch %s --depth 1 %s apidocs" % (
-                    publish_github_branch, publish_github_url), capture=True)
+                    publish_github_repo_branch, publish_github_repo_url), capture=True)
             except subprocess.CalledProcessError as exc_info:
-                msg = "Remote branch %s not found in upstream origin" % publish_github_branch
+                msg = "Remote branch %s not found in upstream origin" % publish_github_repo_branch
                 if msg not in exc_info.output:
                     raise
                 # Create orphan branch
-                execute("git clone %s apidocs" % publish_github_url)
+                execute("git clone %s apidocs" % publish_github_repo_url)
                 with working_dir("apidocs"):
-                    execute("git symbolic-ref HEAD refs/heads/%s" % publish_github_branch)
+                    execute("git symbolic-ref HEAD refs/heads/%s" % publish_github_repo_branch)
                     os.remove(".git/index")
                     execute("git clean -fdx")
 
@@ -165,7 +167,7 @@ def _apidocs_publish_doxygen(
             # Update
             execute("git fetch origin")
             try:
-                execute("git reset --hard origin/%s" % publish_github_branch, capture=True)
+                execute("git reset --hard origin/%s" % publish_github_repo_branch, capture=True)
             except subprocess.CalledProcessError:
                 pass
 
@@ -199,8 +201,8 @@ def _apidocs_publish_doxygen(
                 return
             xxx_token = len(publish_github_token) * "X"
             publish_github_push_url = "https://%s@github.com/%s" % (
-                xxx_token, publish_github_repo)
-            cmd = "git push %s %s" % (publish_github_push_url, publish_github_branch)
+                xxx_token, publish_github_repo_name)
+            cmd = "git push %s %s" % (publish_github_push_url, publish_github_repo_branch)
             try:
                 print("\n%s" % cmd)
                 subprocess.check_output(shlex.split(cmd.replace(xxx_token, publish_github_token)))
@@ -241,12 +243,12 @@ def cli():
         help="Github email to associate with the commits (default: slicerbot@slicer.org)"
     )
     publish_group.add_argument(
-        "--publish-github-repo", type=str, default="slicer/apidocs.slicer.org",
+        "--publish-github-repo-name", type=str, default="slicer/apidocs.slicer.org",
         help="Github repository hosting generated HTML documentation "
              "(default: slicer/apidocs.slicer.org)"
     )
     publish_group.add_argument(
-        "--publish-github-branch", type=str, default="gh-pages",
+        "--publish-github-repo-branch", type=str, default="gh-pages",
         help="Github branch hosting generated HTML documentation (default: gh-pages)"
     )
     publish_group.add_argument(
@@ -278,9 +280,9 @@ def cli():
     # apidocs publishing
     publish_github_username = args.publish_github_username
     publish_github_useremail = args.publish_github_useremail
-    publish_github_repo = args.publish_github_repo
-    publish_github_url = "git://github.com/" + publish_github_repo
-    publish_github_branch = args.publish_github_branch
+    publish_github_repo_name = args.publish_github_repo_name
+    publish_github_repo_branch = args.publish_github_repo_branch
+    publish_github_repo_url = "git://github.com/" + publish_github_repo_name
     publish_github_token = args.publish_github_token
 
     # Skipping
@@ -306,9 +308,9 @@ def cli():
         print("\nApidocs publishing parameters")
         print("  * username ....................: %s" % publish_github_username)
         print("  * useremail ...................: %s" % publish_github_useremail)
-        print("  * url .........................: %s" % publish_github_url)
-        print("  * repo ........................: %s" % publish_github_repo)
-        print("  * branch ......................: %s" % publish_github_branch)
+        print("  * repo_url ....................: %s" % publish_github_repo_url)
+        print("  * repo_repo ...................: %s" % publish_github_repo_name)
+        print("  * repo_branch .................: %s" % publish_github_repo_branch)
         print("  * github_token.................: %s" % publish_github_token_obfuscated)
 
         # Summary
@@ -337,10 +339,12 @@ def cli():
 
     _apidocs_publish_doxygen(
         doxygen_output_dir=doxygen_output_dir,
-        publish_github_url=publish_github_url, publish_github_branch=publish_github_branch,
+        publish_github_repo_url=publish_github_repo_url,
+        publish_github_repo_name=publish_github_repo_name,
+        publish_github_repo_branch=publish_github_repo_branch,
         publish_github_username=publish_github_username,
         publish_github_useremail=publish_github_useremail,
-        publish_github_repo=publish_github_repo, publish_github_token=publish_github_token,
+        publish_github_token=publish_github_token,
         publish_github_subdir=slicer_repo_branch,
         skip_publish=skip_publish,
         slicer_repo_tag=slicer_repo_tag,

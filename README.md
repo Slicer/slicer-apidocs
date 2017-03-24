@@ -34,25 +34,32 @@ branch.
 # usage
 
 ```bash
-usage: slicer-apidocs-builder [-h] [--repo REPO] [--branch BRANCH] [--tag TAG]
-                              [--slicer-src-dir SLICER_SRC_DIR] [--skip-build]
+usage: slicer-apidocs-builder [-h] [--slicer-repo-name SLICER_REPO_NAME]
+                              [--slicer-repo-dir SLICER_REPO_DIR]
+                              [--slicer-repo-branch SLICER_REPO_BRANCH]
+                              [--slicer-repo-tag SLICER_REPO_TAG]
+                              [--skip-build]
                               [--publish-github-username PUBLISH_GITHUB_USERNAME]
                               [--publish-github-useremail PUBLISH_GITHUB_USEREMAIL]
-                              [--publish-github-repo PUBLISH_GITHUB_REPO]
-                              [--publish-github-branch PUBLISH_GITHUB_BRANCH]
+                              [--publish-github-repo-name PUBLISH_GITHUB_REPO_NAME]
+                              [--publish-github-repo-branch PUBLISH_GITHUB_REPO_BRANCH]
                               [--publish-github-token PUBLISH_GITHUB_TOKEN]
 
 optional arguments:
   -h, --help            show this help message and exit
 
 Apidocs Building:
-  --repo REPO           Slicer repository to document (default: Slicer/Slicer)
-  --branch BRANCH       Slicer branch to document (default: master)
-  --tag TAG             Slicer tag to document. If specified --branch is
-                        ignored.
-  --slicer-src-dir SLICER_SRC_DIR
+  --slicer-repo-name SLICER_REPO_NAME
+                        Slicer repository to document (default:
+                        Slicer/Slicer).
+  --slicer-repo-dir SLICER_REPO_DIR
                         Slicer sources checkout to reuse. By default, checkout
                         source in TEMP directory.
+  --slicer-repo-branch SLICER_REPO_BRANCH
+                        Slicer branch to document (default: master)
+  --slicer-repo-tag SLICER_REPO_TAG
+                        Slicer tag to document. If specified --branch is
+                        ignored.
   --skip-build          If specified, skip generation of HTML and reuse
                         existing files.
 
@@ -63,10 +70,10 @@ Apidocs Publishing:
   --publish-github-useremail PUBLISH_GITHUB_USEREMAIL
                         Github email to associate with the commits (default:
                         slicerbot@slicer.org)
-  --publish-github-repo PUBLISH_GITHUB_REPO
+  --publish-github-repo-name PUBLISH_GITHUB_REPO_NAME
                         Github repository hosting generated HTML documentation
                         (default: slicer/apidocs.slicer.org)
-  --publish-github-branch PUBLISH_GITHUB_BRANCH
+  --publish-github-repo-branch PUBLISH_GITHUB_REPO_BRANCH
                         Github branch hosting generated HTML documentation
                         (default: gh-pages)
   --publish-github-token PUBLISH_GITHUB_TOKEN
