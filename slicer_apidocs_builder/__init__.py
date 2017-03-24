@@ -202,12 +202,16 @@ def _apidocs_publish_doxygen(
             xxx_token = len(publish_github_token) * "X"
             publish_github_push_url = "https://%s@github.com/%s" % (
                 xxx_token, publish_github_repo_name)
-            cmd = "git push %s %s" % (publish_github_push_url, publish_github_repo_branch)
+            xxx_cmd = "git push %s %s" % (publish_github_push_url, publish_github_repo_branch)
             try:
-                print("\n%s" % cmd)
-                subprocess.check_output(shlex.split(cmd.replace(xxx_token, publish_github_token)))
+                print("\n%s" % xxx_cmd)
+                subprocess.check_output(
+                    shlex.split(xxx_cmd.replace(xxx_token, publish_github_token)),
+                    stderr=subprocess.STDOUT
+                )
             except subprocess.CalledProcessError as exc_info:
-                print("Failed to publish documentation. Return code is %s" % exc_info.returncode)
+                raise subprocess.CalledProcessError(
+                    exc_info.returncode, xxx_cmd, "Failed to publish documentation.")
 def cli():
     parser = argparse.ArgumentParser()
     # Apidocs building parameters
@@ -317,7 +321,7 @@ def cli():
         print("  * username ....................: %s" % publish_github_username)
         print("  * useremail ...................: %s" % publish_github_useremail)
         print("  * repo_url ....................: %s" % publish_github_repo_url)
-        print("  * repo_repo ...................: %s" % publish_github_repo_name)
+        print("  * repo_name ...................: %s" % publish_github_repo_name)
         print("  * repo_branch .................: %s" % publish_github_repo_branch)
         print("  * github_token.................: %s" % publish_github_token_obfuscated)
 
