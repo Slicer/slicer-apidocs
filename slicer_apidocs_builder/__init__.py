@@ -297,14 +297,16 @@ def cli():
     skip_clone = os.path.exists(slicer_repo_dir)
 
     def _apidocs_display_report():
-        print("\nApidocs building parameters")
-        print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
-        print("  * repo_name....................: %s" % slicer_repo_name)
-        print("  * repo_branch .................: %s" % slicer_repo_branch)
-        print("  * repo_tag ....................: %s" % slicer_repo_tag)
-        print("  * repo_dir ....................: %s" % slicer_repo_dir)
-        print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
-        print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
+
+        if not skip_build:
+            print("\nApidocs building parameters")
+            print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
+            print("  * repo_name....................: %s" % slicer_repo_name)
+            print("  * repo_branch .................: %s" % slicer_repo_branch)
+            print("  * repo_tag ....................: %s" % slicer_repo_tag)
+            print("  * repo_dir ....................: %s" % slicer_repo_dir)
+            print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
+            print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
 
         if publish_github_token:
             publish_github_token_obfuscated = "x" * len(publish_github_token)
@@ -320,14 +322,14 @@ def cli():
         print("  * github_token.................: %s" % publish_github_token_obfuscated)
 
         # Summary
-        skip_build_reason = ""
-        skip_publish_reason = "(Missing GitHub token)" if skip_publish else ""
-        skip_clone_reason = "(Found existing checkout: %s)" % slicer_repo_dir if skip_clone else ""
+        skip_build_reason = "(--skip-build argument)" if skip_build else ""
+        skip_publish_reason = "(missing GitHub token)" if skip_publish else ""
+        skip_clone_reason = "(found existing checkout: %s)" % slicer_repo_dir if skip_clone else ""
 
         print("\nSummary:")
+        print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
         print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
         print("  * publishing on github.io .....: %s   %s" % (not skip_publish, skip_publish_reason))
-        print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
 
     _apidocs_display_report()
 
