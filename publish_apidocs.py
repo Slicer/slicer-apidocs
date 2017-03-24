@@ -51,8 +51,8 @@ def working_dir(directory=None, make_directory=False):
     os.chdir(old_cwd)
 
 
-def execute(cmd, capture=False):
-    print("\n%s" % cmd)
+def execute(cmd, capture=False, fatal=True):
+    print("\n> %s\n" % cmd)
     check_func = subprocess.check_call
     extra_kwargs = {}
     if capture:
@@ -78,7 +78,7 @@ def extract_slicer_version(slicer_src_dir):
     return "{major}.{minor}".format(**parts)
 
 
-def main():
+def cli():
     parser = argparse.ArgumentParser()
     parser.add_argument("--repo", type=str, default="Slicer/Slicer")
     parser.add_argument("--branch", type=str, default="master")
@@ -105,9 +105,9 @@ def main():
         publish_github_token = os.environ.get("GITHUB_TOKEN", None)
 
     print("\nApidocs repository")
-    print("   url: %s" % publish_github_url)
-    print("  repo: %s" % publish_github_repo)
-    print("  branch: %s" % publish_github_branch)
+    print("  * url .........................: %s" % publish_github_url)
+    print("  * repo ........................: %s" % publish_github_repo)
+    print("  * branch ......................: %s" % publish_github_branch)
 
     slicer_src_dir = args.slicer_src_dir
     directory = "%s-%s" % (repo.replace("/", "-"), branch)
@@ -118,26 +118,27 @@ def main():
         slicer_src_dir = root_dir + "/" + directory
 
     print("\nDirectories")
-    print(" apidocs source dir: %s" % apidocs_src_dir)
-    print(" apidocs  build dir: %s" % apidocs_build_dir)
-    print(" Slicer  source dir: %s" % slicer_src_dir)
+    print("  * apidocs source dir ..........: %s" % apidocs_src_dir)
+    print("  * apidocs build dir ...........: %s" % apidocs_build_dir)
+    print("  * Slicer source dir ...........: %s" % slicer_src_dir)
 
     skip_build = args.skip_build
-    skip_publish = publish_github_token is None
-    skip_publish_reason = ""
-    if skip_publish:
-        skip_publish_reason = ": Consider passing --publish-github-token argument " \
-                              "or setting GITHUB_TOKEN env. variable"
+    skip_build_reason = ""
 
-    print("\nSkipping")
-    print("    build: %s" % skip_build)
-    print("  publish: %s%s" % (skip_publish, skip_publish_reason))
+    skip_publish = publish_github_token is None
+    skip_publish_reason = "[Missing GitHub token]" if skip_publish else ""
+
+    skip_clone = os.path.exists(slicer_src_dir)
+    skip_clone_reason = "[Found existing checkout: %s]" % slicer_src_dir if skip_clone else ""
+
+    print("\nSummary:")
+    print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
+    print("  * publishing on github.io .....: %s   %s" % (not skip_publish, skip_publish_reason))
+    print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
 
     # Get Slicer source
-    if not os.path.exists(slicer_src_dir):
+    if not skip_clone:
         execute("git clone %s --branch %s --depth 1 %s" % (clone_url, branch, slicer_src_dir))
-    else:
-        print("\nFound %s: skipping clone" % slicer_src_dir)
 
     with working_dir(slicer_src_dir):
 
@@ -236,6 +237,16 @@ def main():
                 subprocess.check_output(shlex.split(cmd.replace(xxx_token, publish_github_token)))
             except subprocess.CalledProcessError as exc_info:
                 print("Failed to publish documentation. Return code is %s" % exc_info.returncode)
+
+
+def main():
+    try:
+        cli()
+    except subprocess.CalledProcessError as exc_info:
+        print("\nExit code: %s" % exc_info.returncode)
+        if exc_info.output:
+            print("\nOutput: %s" % exc_info.output)
+        raise SystemExit(exc_info.returncode)
 
 
 if __name__ == '__main__':
