@@ -81,45 +81,47 @@ def extract_slicer_version(slicer_src_dir):
 def cli():
     parser = argparse.ArgumentParser()
     # Apidocs building parameters
-    parser.add_argument(
+    build_group = parser.add_argument_group('Apidocs Building')
+    build_group.add_argument(
         "--repo", type=str, default="Slicer/Slicer",
         help="Slicer repository to document (default: Slicer/Slicer)"
     )
-    parser.add_argument(
+    build_group.add_argument(
         "--branch", type=str, default="master",
         help="Slicer branch to document (default: master)"
     )
-    parser.add_argument(
+    build_group.add_argument(
         "--tag", type=str,
         help="Slicer tag to document. If specified --branch is ignored."
     )
-    parser.add_argument(
+    build_group.add_argument(
         "--slicer-src-dir", type=str,
         help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
     )
-    parser.add_argument(
+    build_group.add_argument(
         "--skip-build", action="store_true",
         help="If specified, skip generation of HTML and reuse existing files."
     )
     # apidocs publishing parameters
-    parser.add_argument(
+    publish_group = parser.add_argument_group('Apidocs Publishing')
+    publish_group.add_argument(
         "--publish-github-username", type=str, default="Slicer Bot",
         help="Github name to associate with the commits (default: Slicer Bot)"
     )
-    parser.add_argument(
+    publish_group.add_argument(
         "--publish-github-useremail", type=str, default="slicerbot@slicer.org",
         help="Github email to associate with the commits (default: slicerbot@slicer.org)"
     )
-    parser.add_argument(
+    publish_group.add_argument(
         "--publish-github-repo", type=str, default="slicer/apidocs.slicer.org",
         help="Github repository hosting generated HTML documentation "
              "(default: slicer/apidocs.slicer.org)"
     )
-    parser.add_argument(
+    publish_group.add_argument(
         "--publish-github-branch", type=str, default="gh-pages",
         help="Github branch hosting generated HTML documentation (default: gh-pages)"
     )
-    parser.add_argument(
+    publish_group.add_argument(
         "--publish-github-token", type=str,
         default=os.environ.get("PUBLISH_GITHUB_TOKEN", None),
         help="GitHub Token allowing to publish generated documentation "

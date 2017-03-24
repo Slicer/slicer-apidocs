@@ -35,14 +35,17 @@ branch.
 
 ```bash
 usage: slicer-apidocs-builder [-h] [--repo REPO] [--branch BRANCH] [--tag TAG]
-                              [--slicer-src-dir SLICER_SRC_DIR]
+                              [--slicer-src-dir SLICER_SRC_DIR] [--skip-build]
+                              [--publish-github-username PUBLISH_GITHUB_USERNAME]
+                              [--publish-github-useremail PUBLISH_GITHUB_USEREMAIL]
                               [--publish-github-repo PUBLISH_GITHUB_REPO]
                               [--publish-github-branch PUBLISH_GITHUB_BRANCH]
                               [--publish-github-token PUBLISH_GITHUB_TOKEN]
-                              [--skip-build]
 
 optional arguments:
   -h, --help            show this help message and exit
+
+Apidocs Building:
   --repo REPO           Slicer repository to document (default: Slicer/Slicer)
   --branch BRANCH       Slicer branch to document (default: master)
   --tag TAG             Slicer tag to document. If specified --branch is
@@ -50,6 +53,16 @@ optional arguments:
   --slicer-src-dir SLICER_SRC_DIR
                         Slicer sources checkout to reuse. By default, checkout
                         source in TEMP directory.
+  --skip-build          If specified, skip generation of HTML and reuse
+                        existing files.
+
+Apidocs Publishing:
+  --publish-github-username PUBLISH_GITHUB_USERNAME
+                        Github name to associate with the commits (default:
+                        Slicer Bot)
+  --publish-github-useremail PUBLISH_GITHUB_USEREMAIL
+                        Github email to associate with the commits (default:
+                        slicerbot@slicer.org)
   --publish-github-repo PUBLISH_GITHUB_REPO
                         Github repository hosting generated HTML documentation
                         (default: slicer/apidocs.slicer.org)
@@ -58,9 +71,8 @@ optional arguments:
                         (default: gh-pages)
   --publish-github-token PUBLISH_GITHUB_TOKEN
                         GitHub Token allowing to publish generated
-                        documentation (default: GITHUB_TOKEN env. variable)
-  --skip-build          If specified, skip generation of HTML and reuse
-                        existing files.
+                        documentation (default: PUBLISH_GITHUB_TOKEN env.
+                        variable)
 ```
 
 
