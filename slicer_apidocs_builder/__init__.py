@@ -275,15 +275,6 @@ def cli():
         slicer_repo_dir = root_dir + "/" + directory
     slicer_repo_dir = os.path.abspath(slicer_repo_dir)
 
-    print("\nApidocs building parameters")
-    print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
-    print("  * repo_name....................: %s" % slicer_repo_name)
-    print("  * repo_branch .................: %s" % slicer_repo_branch)
-    print("  * repo_tag ....................: %s" % slicer_repo_tag)
-    print("  * repo_dir ....................: %s" % slicer_repo_dir)
-    print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
-    print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
-
     # apidocs publishing
     publish_github_username = args.publish_github_username
     publish_github_useremail = args.publish_github_useremail
@@ -292,34 +283,45 @@ def cli():
     publish_github_branch = args.publish_github_branch
     publish_github_token = args.publish_github_token
 
-    publish_github_token_msg = "(missing)"
-    if publish_github_token:
-        publish_github_token_msg = "x" * len(publish_github_token) + " (obfuscated)"
-
-    print("\nApidocs publishing parameters")
-    print("  * username ....................: %s" % publish_github_username)
-    print("  * useremail ...................: %s" % publish_github_useremail)
-    print("  * url .........................: %s" % publish_github_url)
-    print("  * repo ........................: %s" % publish_github_repo)
-    print("  * branch ......................: %s" % publish_github_branch)
-    print("  * github_token.................: %s" % publish_github_token_msg)
-
-
-
-    # Summary
+    # Skipping
     skip_build = args.skip_build
-    skip_build_reason = ""
-
     skip_publish = publish_github_token is None
-    skip_publish_reason = "[Missing GitHub token]" if skip_publish else ""
-
     skip_clone = os.path.exists(slicer_repo_dir)
-    skip_clone_reason = "[Found existing checkout: %s]" % slicer_repo_dir if skip_clone else ""
 
-    print("\nSummary:")
-    print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
-    print("  * publishing on github.io .....: %s   %s" % (not skip_publish, skip_publish_reason))
-    print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
+    def _apidocs_display_report():
+        print("\nApidocs building parameters")
+        print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
+        print("  * repo_name....................: %s" % slicer_repo_name)
+        print("  * repo_branch .................: %s" % slicer_repo_branch)
+        print("  * repo_tag ....................: %s" % slicer_repo_tag)
+        print("  * repo_dir ....................: %s" % slicer_repo_dir)
+        print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
+        print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
+
+        if publish_github_token:
+            publish_github_token_obfuscated = "x" * len(publish_github_token)
+        else:
+            publish_github_token_obfuscated = "(missing)"
+
+        print("\nApidocs publishing parameters")
+        print("  * username ....................: %s" % publish_github_username)
+        print("  * useremail ...................: %s" % publish_github_useremail)
+        print("  * url .........................: %s" % publish_github_url)
+        print("  * repo ........................: %s" % publish_github_repo)
+        print("  * branch ......................: %s" % publish_github_branch)
+        print("  * github_token.................: %s" % publish_github_token_obfuscated)
+
+        # Summary
+        skip_build_reason = ""
+        skip_publish_reason = "(Missing GitHub token)" if skip_publish else ""
+        skip_clone_reason = "(Found existing checkout: %s)" % slicer_repo_dir if skip_clone else ""
+
+        print("\nSummary:")
+        print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
+        print("  * publishing on github.io .....: %s   %s" % (not skip_publish, skip_publish_reason))
+        print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
+
+    _apidocs_display_report()
 
     doxygen_output_dir = _apidocs_build_doxygen(
         apidocs_src_dir=apidocs_src_dir, apidocs_build_dir=apidocs_build_dir,
@@ -345,6 +347,11 @@ def cli():
         slicer_repo_name=slicer_repo_name,
         slicer_repo_head_sha=slicer_repo_head_sha
     )
+
+    # Since building the doxygen documentation outputs a lot of text,
+    # for convenience let's display the report again.
+    if not skip_build:
+        _apidocs_display_report()
 
 
 def main():
