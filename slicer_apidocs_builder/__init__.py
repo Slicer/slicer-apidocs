@@ -83,20 +83,20 @@ def cli():
     # Apidocs building parameters
     build_group = parser.add_argument_group('Apidocs Building')
     build_group.add_argument(
-        "--repo", type=str, default="Slicer/Slicer",
-        help="Slicer repository to document (default: Slicer/Slicer)"
+        "--slicer-repo-name", type=str, default="Slicer/Slicer",
+        help="Slicer repository to document (default: Slicer/Slicer)."
     )
     build_group.add_argument(
-        "--branch", type=str, default="master",
+        "--slicer-repo-dir", type=str,
+        help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
+    )
+    build_group.add_argument(
+        "--slicer-repo-branch", type=str, default="master",
         help="Slicer branch to document (default: master)"
     )
     build_group.add_argument(
-        "--tag", type=str,
+        "--slicer-repo-tag", type=str,
         help="Slicer tag to document. If specified --branch is ignored."
-    )
-    build_group.add_argument(
-        "--slicer-src-dir", type=str,
-        help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
     )
     build_group.add_argument(
         "--skip-build", action="store_true",
@@ -130,18 +130,18 @@ def cli():
     args = parser.parse_args()
 
     # apidocs building parameters
-    clone_url = "git://github.com/%s" % args.repo
-    repo = args.repo
-    branch = args.branch
-    tag = args.tag
-    if tag:
-        branch = tag
+    slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
+    slicer_repo_name = args.slicer_repo_name
+    slicer_repo_branch = args.slicer_repo_branch
+    slicer_repo_tag = args.slicer_repo_tag
+    if slicer_repo_tag:
+        slicer_repo_branch = slicer_repo_tag
 
     print("\nApidocs building parameters")
-    print("  * clone_url ...................: %s" % clone_url)
-    print("  * repo ........................: %s" % repo)
-    print("  * branch ......................: %s" % branch)
-    print("  * tag .........................: %s" % tag)
+    print("  * repo_clone_url ..............: %s" % slicer_repo_clone_url)
+    print("  * repo_name....................: %s" % slicer_repo_name)
+    print("  * repo_branch .................: %s" % slicer_repo_branch)
+    print("  * repo_tag ....................: %s" % slicer_repo_tag)
 
     # apidocs publishing
     publish_github_username = args.publish_github_username
@@ -164,18 +164,18 @@ def cli():
     print("  * github_token.................: %s" % publish_github_token_msg)
 
     # Directories
-    slicer_src_dir = args.slicer_src_dir
-    directory = "%s-%s" % (repo.replace("/", "-"), branch)
+    slicer_repo_dir = args.slicer_repo_dir
+    directory = "%s-%s" % (slicer_repo_name.replace("/", "-"), slicer_repo_branch)
     root_dir = tempfile.gettempdir()
     apidocs_src_dir = root_dir + "/" + "%s-src" % directory
     apidocs_build_dir = root_dir + "/" + "%s-build" % directory
-    if not slicer_src_dir:
-        slicer_src_dir = root_dir + "/" + directory
+    if not slicer_repo_dir:
+        slicer_repo_dir = root_dir + "/" + directory
 
     print("\nDirectories")
-    print("  * apidocs source dir ..........: %s" % apidocs_src_dir)
-    print("  * apidocs build dir ...........: %s" % apidocs_build_dir)
-    print("  * Slicer source dir ...........: %s" % slicer_src_dir)
+    print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
+    print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
+    print("  * slicer_repo_dir .............: %s" % slicer_repo_dir)
 
     skip_build = args.skip_build
     skip_build_reason = ""
@@ -183,8 +183,8 @@ def cli():
     skip_publish = publish_github_token is None
     skip_publish_reason = "[Missing GitHub token]" if skip_publish else ""
 
-    skip_clone = os.path.exists(slicer_src_dir)
-    skip_clone_reason = "[Found existing checkout: %s]" % slicer_src_dir if skip_clone else ""
+    skip_clone = os.path.exists(slicer_repo_dir)
+    skip_clone_reason = "[Found existing checkout: %s]" % slicer_repo_dir if skip_clone else ""
 
     print("\nSummary:")
     print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
@@ -199,21 +199,21 @@ def cli():
 
     # Get Slicer source
     if not skip_clone:
-        execute("git clone %s --branch %s --depth 1 %s" % (clone_url, branch, slicer_src_dir))
+        execute("git clone %s --branch %s --depth 1 %s" % (slicer_repo_clone_url, slicer_repo_branch, slicer_repo_dir))
 
-    with working_dir(slicer_src_dir):
+    with working_dir(slicer_repo_dir):
 
         # Checkout expected version
-        execute("git reset --hard %s" % (tag if tag else "origin/" + branch))
+        execute("git reset --hard %s" % (slicer_repo_tag if slicer_repo_tag else "origin/" + slicer_repo_branch))
 
         # Get commit
-        slicer_src_commit = execute("git rev-parse --short HEAD", capture=True)
-        print("Slicer commit: %s" % slicer_src_commit)
+        slicer_repo_head_sha = execute("git rev-parse HEAD", capture=True)
+        print("slicer_repo_head_sha: %s" % slicer_repo_head_sha)
 
-    if tag:
-        version = ".".join(tag.lstrip("v").split(".")[:2])
+    if slicer_repo_tag:
+        version = ".".join(slicer_repo_tag.lstrip("v").split(".")[:2])
     else:
-        version = extract_slicer_version(slicer_src_dir)
+        version = extract_slicer_version(slicer_repo_dir)
 
     print("\nSlicer version: %s" % version)
 
@@ -222,7 +222,7 @@ def cli():
         def configure():
             execute([
                 "cmake",
-                "-DSlicer_SOURCE_DIR:PATH=%s" % os.path.join(root_dir, slicer_src_dir),
+                "-DSlicer_SOURCE_DIR:PATH=%s" % os.path.join(root_dir, slicer_repo_dir),
                 "-DSlicer_VERSION:STRING=%s" % version,
                 #  "-G", "Ninja",
                 apidocs_src_dir
@@ -269,16 +269,16 @@ def cli():
 
             # Rename html directory (html -> (vX.Y|<branch_name>)
             if os.path.exists("../html"):
-                if os.path.exists(branch):
-                    shutil.rmtree(branch)
-                shutil.move("../html", branch)
+                if os.path.exists(slicer_repo_branch):
+                    shutil.rmtree(slicer_repo_branch)
+                shutil.move("../html", slicer_repo_branch)
 
             # Check if there are changes
             if not execute("git status --porcelain", capture=True) == "":
 
                 execute("git add --all")
 
-                sha = tag if tag else slicer_src_commit
+                sha = slicer_repo_tag if slicer_repo_tag else slicer_repo_head_sha[:8]
 
                 msg = textwrap.dedent("""
                 Slicer apidocs update for %s@%s
@@ -286,7 +286,7 @@ def cli():
                 It was automatically generated by the script ``slicer-apidocs-builder`` [1]
 
                 [1] https://github.com/Slicer/slicer-apidocs-builder
-                """ % (repo, sha))
+                """ % (slicer_repo_name, sha))
                 execute("git commit -m '%s'" % msg)
 
             else:
