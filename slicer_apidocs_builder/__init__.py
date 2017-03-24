@@ -97,6 +97,14 @@ def cli():
         help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
     )
     parser.add_argument(
+        "--publish-github-username", type=str, default="Slicer Bot",
+        help="Github name to associate with the commits (default: Slicer Bot)"
+    )
+    parser.add_argument(
+        "--publish-github-useremail", type=str, default="slicerbot@slicer.org",
+        help="Github email to associate with the commits (default: slicerbot@slicer.org)"
+    )
+    parser.add_argument(
         "--publish-github-repo", type=str, default="slicer/apidocs.slicer.org",
         help="Github repository hosting generated HTML documentation "
              "(default: slicer/apidocs.slicer.org)"
@@ -123,6 +131,8 @@ def cli():
     if tag:
         branch = tag
 
+    publish_github_username = args.publish_github_username
+    publish_github_useremail = args.publish_github_useremail
     publish_github_repo = args.publish_github_repo
     publish_github_url = "git://github.com/" + publish_github_repo
     publish_github_branch = args.publish_github_branch
@@ -131,6 +141,8 @@ def cli():
         publish_github_token = os.environ.get("GITHUB_TOKEN", None)
 
     print("\nApidocs repository")
+    print("  * username ....................: %s" % publish_github_username)
+    print("  * useremail ...................: %s" % publish_github_useremail)
     print("  * url .........................: %s" % publish_github_url)
     print("  * repo ........................: %s" % publish_github_repo)
     print("  * branch ......................: %s" % publish_github_branch)
@@ -226,6 +238,10 @@ def cli():
                     execute("git clean -fdx")
 
         with working_dir("apidocs"):
+
+            # Setup user.name and user.email
+            execute("git config user.email '%s'" % publish_github_useremail)
+            execute("git config user.name '%s'" % publish_github_username)
 
             # Update
             execute("git fetch origin")
