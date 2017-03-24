@@ -112,7 +112,7 @@ def cli():
     slicer_src_dir = args.slicer_src_dir
     directory = "%s-%s" % (repo.replace("/", "-"), branch)
     root_dir = tempfile.gettempdir()
-    apidocs_src_dir = os.path.dirname(os.path.abspath(__file__))
+    apidocs_src_dir = root_dir + "/" + "%s-src" % directory
     apidocs_build_dir = root_dir + "/" + "%s-build" % directory
     if not slicer_src_dir:
         slicer_src_dir = root_dir + "/" + directory
@@ -135,6 +135,12 @@ def cli():
     print("  * building doxygen ............: %s   %s" % (not skip_build, skip_build_reason))
     print("  * publishing on github.io .....: %s   %s" % (not skip_publish, skip_publish_reason))
     print("  * cloning Slicer repository ...: %s   %s" % (not skip_clone, skip_clone_reason))
+
+    apidocs_cmakelists = os.path.dirname(os.path.abspath(__file__)) + "/CMakeLists.txt"
+    print("\nCopying %s into %s" % (apidocs_cmakelists, apidocs_src_dir))
+    mkdir_p(apidocs_src_dir)
+    shutil.copy(apidocs_cmakelists, apidocs_src_dir)
+
 
     # Get Slicer source
     if not skip_clone:
