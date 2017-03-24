@@ -225,6 +225,8 @@ def main():
                 print("\nNo new changes to publish")
 
             # Publish
+            if skip_publish:
+                return
             xxx_token = len(publish_github_token) * "X"
             publish_github_url = "https://%s@github.com/%s" % (
                 xxx_token, publish_github_repo)
