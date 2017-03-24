@@ -259,23 +259,29 @@ def cli():
     )
     args = parser.parse_args()
 
-    # apidocs building parameters
-    slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
+    # Slicer repo name, branch and tag
     slicer_repo_name = args.slicer_repo_name
     slicer_repo_branch = args.slicer_repo_branch
     slicer_repo_tag = args.slicer_repo_tag
     if slicer_repo_tag:
         slicer_repo_branch = slicer_repo_tag
 
-    # Directories
-    slicer_repo_dir = args.slicer_repo_dir
-    directory = "%s-%s" % (slicer_repo_name.replace("/", "-"), slicer_repo_branch)
+    # Root directory
     root_dir = tempfile.gettempdir()
-    apidocs_src_dir = root_dir + "/" + "%s-src" % directory
-    apidocs_build_dir = root_dir + "/" + "%s-build" % directory
+    directory = "%s-%s" % (slicer_repo_name.replace("/", "-"), slicer_repo_branch)
+
+    # Default value for Slicer source directory
+    slicer_repo_dir = args.slicer_repo_dir
     if not slicer_repo_dir:
         slicer_repo_dir = root_dir + "/" + directory
     slicer_repo_dir = os.path.abspath(slicer_repo_dir)
+
+    # apidocs building parameters
+    slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
+
+    # Apidocs directories
+    apidocs_src_dir = root_dir + "/" + "%s-src" % directory
+    apidocs_build_dir = root_dir + "/" + "%s-build" % directory
 
     # apidocs publishing
     publish_github_username = args.publish_github_username
