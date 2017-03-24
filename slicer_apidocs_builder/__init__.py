@@ -251,6 +251,8 @@ def main():
         if exc_info.output:
             print("\nOutput: %s" % exc_info.output)
         raise SystemExit(exc_info.returncode)
+    except KeyboardInterrupt:
+        print("interrupt received, stopping...")
 
 
 if __name__ == '__main__':
