@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import argparse
-import errno
 import os
 import re
 import shlex
@@ -10,55 +11,9 @@ import subprocess
 import tempfile
 import textwrap
 
-from contextlib import contextmanager
+import github3
 
-
-def mkdir_p(path):
-    """Ensure directory ``path`` exists. If needed, parent directories
-    are created.
-
-    Adapted from http://stackoverflow.com/a/600612/1539918
-    """
-    try:
-        os.makedirs(path)
-    except OSError as exc:  # Python >2.5
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:  # pragma: no cover
-            raise
-
-
-@contextmanager
-def working_dir(directory=None, make_directory=False):
-    """
-    Context manager to save and optionally change the current directory.
-
-    :param directory:
-      Path to set as current working directory. If ``None``
-      is passed, ``os.getcwd()`` is used instead.
-
-    :param make_directory:
-      If True, ``directory`` is created.
-    """
-    old_cwd = os.getcwd()
-
-    if directory:
-        if make_directory:
-            mkdir_p(directory)
-        os.chdir(directory)
-        print("\ncwd: %s" % os.getcwd())
-    yield
-    os.chdir(old_cwd)
-
-
-def execute(cmd, capture=False):
-    print("\n> %s\n" % cmd)
-    check_func = subprocess.check_call
-    extra_kwargs = {}
-    if capture:
-        check_func = subprocess.check_output
-        extra_kwargs = {"stderr": subprocess.STDOUT}
-    return check_func(cmd if isinstance(cmd, list) else shlex.split(cmd), **extra_kwargs)
+from .utils import execute, mkdir_p, working_dir
 
 
 def extract_slicer_version(slicer_src_dir):
@@ -212,6 +167,7 @@ def _apidocs_publish_doxygen(
             except subprocess.CalledProcessError as exc_info:
                 raise subprocess.CalledProcessError(
                     exc_info.returncode, xxx_cmd, "Failed to publish documentation.")
+
 def cli():
     parser = argparse.ArgumentParser()
     # Apidocs building parameters
