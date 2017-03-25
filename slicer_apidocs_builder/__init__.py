@@ -187,6 +187,78 @@ def _apidocs_publish_doxygen(
                 raise subprocess.CalledProcessError(
                     exc_info.returncode, xxx_cmd, "Failed to publish documentation.")
 
+
+def _apidocs_status_update(
+        status_update_state,
+        status_update_repo_name=None,
+        status_update_revision=None,
+        status_update_revision_remark="",
+        status_update_target_url_base=None,
+        status_update_target_url_path=None,
+        status_update_token=None
+):
+    assert status_update_state
+    missing = (not status_update_repo_name
+               or not status_update_revision
+               or not status_update_target_url_base
+               or not status_update_target_url_path
+               or not status_update_token)
+
+    if not status_update_repo_name:
+        status_update_repo_name = "(missing)"
+
+    if not status_update_revision:
+        status_update_revision = "(missing)"
+
+    if not status_update_target_url_base:
+        status_update_target_url_base = "(missing)"
+
+    if not status_update_target_url_path:
+        status_update_target_url_path = "(missing)"
+
+    if status_update_token:
+        status_update_token_obfuscated = "x" * len(status_update_token)
+    else:
+        status_update_token_obfuscated = "(missing)"
+
+    status_update_target_url = status_update_target_url_base + "/" + status_update_target_url_path
+
+    print("\nApidocs status update parameters")
+    print("  * state .......................: %s" % status_update_state)
+    print("  * repo_name ...................: %s" % status_update_repo_name)
+    print("  * revision ....................: %s  %s" % (status_update_revision,
+                                                         status_update_revision_remark))
+    print("  * target_url_base .............: %s" % status_update_target_url_base)
+    print("  * target_url_path .............: %s" % status_update_target_url_path)
+    print("  * target_url ..................: %s" % status_update_target_url)
+    print("  * github_token ................: %s" % status_update_token_obfuscated)
+
+    if missing:
+        print("\nAborting: parameters are missing")
+        return
+
+    owner, repository = status_update_repo_name.split("/")
+    gh = github3.GitHub()
+    gh.login(token=status_update_token)
+    repository = gh.repository(owner, repository)
+
+    messages = {
+        "pending": "API documentation is being generated",
+        "failure": "API documentation failed to be generated",
+        "success": "API documentation published"
+    }
+
+    response = repository.create_status(
+        status_update_revision,
+        state=status_update_state,
+        context="slicer/apidocs",
+        description=messages[status_update_state],
+        target_url=status_update_target_url
+    )
+    if response is None:
+        raise RuntimeError("Failed to create GitHub status")
+
+
 def cli():
     parser = argparse.ArgumentParser()
     # Apidocs building parameters
@@ -200,8 +272,8 @@ def cli():
         help="Slicer sources checkout to reuse. By default, checkout source in TEMP directory."
     )
     build_group.add_argument(
-        "--slicer-repo-branch", type=str, default="master",
-        help="Slicer branch to document (default: master)"
+        "--slicer-repo-branch", type=str,
+        help="Slicer branch to document (example: master)"
     )
     build_group.add_argument(
         "--slicer-repo-tag", type=str,
@@ -236,6 +308,36 @@ def cli():
         help="GitHub Token allowing to publish generated documentation "
              "(default: PUBLISH_GITHUB_TOKEN env. variable)"
     )
+    # apidocs builder overall status update
+    status_update_group = parser.add_argument_group('Apidocs Status Update')
+    status_update_group.add_argument(
+        "--status-update-state", type=str, choices=["pending", "failure", "success"],
+        help="State of the apidocs"
+    )
+    status_update_group.add_argument(
+        "--status-update-target-url-base", type=str, default="http://apidocs.slicer.org",
+        help="URL to associate with the state update. (default: http://apidocs.slicer.org)"
+    )
+    status_update_group.add_argument(
+        "--status-update-target-url-path", type=str,
+        help="Path appended to target base URL."
+             "(default: based on value of --slicer-repo-branch and --slicer-repo-tag)"
+    )
+    status_update_group.add_argument(
+        "--status-update-revision", type=str,
+        help="Slicer revision to update"
+             "(default to HEAD of Slicer source checkout. See --slicer-repo-dir)"
+    )
+    status_update_group.add_argument(
+        "--status-update-repo-name", type=str,
+        help="Slicer repo name to update (default to --slicer-repo-name)"
+    )
+    status_update_group.add_argument(
+        "--status-update-token", type=str,
+        default=os.environ.get("STATUS_UPDATE_GITHUB_TOKEN", None),
+        help="GitHub token allowing to update status "
+             "(default: STATUS_UPDATE_GITHUB_TOKEN env. variable)"
+    )
     args = parser.parse_args()
 
     # Slicer repo name, branch and tag
@@ -254,6 +356,46 @@ def cli():
     if not slicer_repo_dir:
         slicer_repo_dir = root_dir + "/" + directory
     slicer_repo_dir = os.path.abspath(slicer_repo_dir)
+
+    # apidocs status update
+    if args.status_update_state:
+
+        status_update_state = args.status_update_state
+        status_update_repo_name = args.status_update_repo_name
+        status_update_revision = args.status_update_revision
+        status_update_token = args.status_update_token
+        status_update_target_url_base = args.status_update_target_url_base
+        status_update_target_url_path = args.status_update_target_url_path
+
+        if not status_update_repo_name:
+            status_update_repo_name = slicer_repo_name
+
+        if not status_update_target_url_path:
+            status_update_target_url_path = slicer_repo_branch
+
+        status_update_revision_remark = ""
+        if not status_update_revision:
+            if os.path.exists(slicer_repo_dir + "/.git"):
+                with working_dir(slicer_repo_dir):
+                    status_update_revision = execute(
+                        "git rev-parse HEAD", capture=True, verbose=False).strip()
+
+                status_update_revision_remark = \
+                    "(extracted from '<slicer_repo_dir:%s>')" % slicer_repo_dir
+            else:
+                status_update_revision_remark = \
+                    "('<slicer_repo_dir:%s/.git>' does not exists)" % slicer_repo_dir
+
+        _apidocs_status_update(
+            status_update_state,
+            status_update_token=status_update_token,
+            status_update_repo_name=status_update_repo_name,
+            status_update_revision=status_update_revision,
+            status_update_revision_remark=status_update_revision_remark,
+            status_update_target_url_base=status_update_target_url_base,
+            status_update_target_url_path=status_update_target_url_path
+        )
+        return
 
     # apidocs building parameters
     slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
