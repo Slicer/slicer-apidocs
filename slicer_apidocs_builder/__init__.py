@@ -34,11 +34,22 @@ def extract_slicer_version(slicer_src_dir):
 
 
 def _apidocs_build_doxygen(
-        apidocs_src_dir=None, apidocs_build_dir=None,
-        slicer_repo_clone_url=None, slicer_repo_dir=None,
-        slicer_repo_branch=None, slicer_repo_tag=None,
-        skip_clone=False, skip_build=False
+        apidocs_src_dir=None,
+        apidocs_build_dir=None,
+        slicer_repo_clone_url=None,
+        slicer_repo_dir=None,
+        slicer_repo_branch=None,
+        slicer_repo_tag=None,
+        skip_clone=False,
+        skip_build=False
 ):
+    assert apidocs_src_dir
+    assert apidocs_build_dir
+    assert slicer_repo_clone_url
+    assert slicer_repo_dir
+    assert slicer_repo_branch
+    # slicer_repo_tag can be unspecified
+
     apidocs_cmakelists = os.path.dirname(os.path.abspath(__file__)) + "/CMakeLists.txt"
     print("\nCopying %s into %s" % (apidocs_cmakelists, apidocs_src_dir))
     mkdir_p(apidocs_src_dir)
@@ -95,6 +106,18 @@ def _apidocs_publish_doxygen(
         skip_publish=False,
         slicer_repo_tag=None, slicer_repo_name=None, slicer_repo_head_sha=None  # For commit message
 ):
+    assert os.path.isdir(doxygen_output_dir)
+    assert publish_github_repo_url
+    assert publish_github_repo_name
+    assert publish_github_repo_branch
+    assert publish_github_username
+    assert publish_github_useremail
+    assert publish_github_token
+    assert publish_github_subdir
+    assert slicer_repo_tag
+    assert slicer_repo_name
+    assert slicer_repo_head_sha
+
     with working_dir(doxygen_output_dir):
 
         # Checkout publishing repo
