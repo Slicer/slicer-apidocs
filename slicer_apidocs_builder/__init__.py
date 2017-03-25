@@ -16,7 +16,7 @@ import github3
 from .utils import execute, mkdir_p, working_dir
 
 
-def extract_slicer_version(slicer_src_dir):
+def extract_slicer_xy_version(slicer_src_dir):
     """Given a Slicer source director, extract <major>.<minor> version
     from top-level CMakeLists.txt
     """
@@ -31,6 +31,10 @@ def extract_slicer_version(slicer_src_dir):
                 if m is not None:
                     parts[part] = m.group(1)
     return "{major}.{minor}".format(**parts)
+
+
+def extract_slicer_xy_version_from_tag(slicer_repo_tag):
+    return ".".join(slicer_repo_tag.lstrip("v").split(".")[:2])
 
 
 def _apidocs_build_doxygen(
@@ -67,9 +71,9 @@ def _apidocs_build_doxygen(
             slicer_repo_tag if slicer_repo_tag else "origin/" + slicer_repo_branch))
 
     if slicer_repo_tag:
-        version = ".".join(slicer_repo_tag.lstrip("v").split(".")[:2])
+        version = extract_slicer_xy_version_from_tag(slicer_repo_tag)
     else:
-        version = extract_slicer_version(slicer_repo_dir)
+        version = extract_slicer_xy_version(slicer_repo_dir)
 
     print("\nSlicer version: %s" % version)
 
