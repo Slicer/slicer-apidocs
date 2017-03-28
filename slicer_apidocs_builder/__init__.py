@@ -176,6 +176,7 @@ def _apidocs_publish_doxygen(
 
         else:
             print("\nNo new changes to publish")
+            skip_publish = True
 
         # Publish
         if skip_publish:
@@ -415,7 +416,7 @@ def cli():
             status_update_target_url=status_update_target_url,
             status_update_branch_or_tag=slicer_repo_branch_or_tag
         )
-        return
+        return 0
 
     # apidocs building parameters
     slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
@@ -465,7 +466,7 @@ def cli():
 
     if not publish_github_token or not slicer_repo_branch_or_tag:
         print("\nAborting: parameters are missing")
-        return
+        return 1
 
     if not skip_build:
 
@@ -510,10 +511,12 @@ def cli():
     if not skip_build:
         _apidocs_display_report()
 
+    return 0
+
 
 def main():
     try:
-        cli()
+        exit(cli())
     except subprocess.CalledProcessError as exc_info:
         print("\nExit code: %s" % exc_info.returncode)
         if exc_info.output:
