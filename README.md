@@ -45,6 +45,7 @@ usage: slicer-apidocs-builder [-h] [--slicer-repo-name SLICER_REPO_NAME]
                               [--publish-github-repo-name PUBLISH_GITHUB_REPO_NAME]
                               [--publish-github-repo-branch PUBLISH_GITHUB_REPO_BRANCH]
                               [--publish-github-token PUBLISH_GITHUB_TOKEN]
+                              [--skip-publish]
                               [--status-update-state {pending,failure,success}]
                               [--status-update-target-url STATUS_UPDATE_TARGET_URL]
                               [--status-update-target-url-path STATUS_UPDATE_TARGET_URL_PATH]
@@ -87,6 +88,7 @@ Apidocs Publishing:
                         GitHub Token allowing to publish generated
                         documentation (default: PUBLISH_GITHUB_TOKEN env.
                         variable)
+  --skip-publish        If specified, skip publication of HTML files.
 
 Apidocs Status Update:
   --status-update-state {pending,failure,success}

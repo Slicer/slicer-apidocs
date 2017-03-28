@@ -346,6 +346,10 @@ def cli():
         help="GitHub Token allowing to publish generated documentation "
              "(default: PUBLISH_GITHUB_TOKEN env. variable)"
     )
+    publish_group.add_argument(
+        "--skip-publish", action="store_true",
+        help="If specified, skip publication of HTML files."
+    )
     # apidocs builder overall status update
     status_update_group = parser.add_argument_group('Apidocs Status Update')
     status_update_group.add_argument(
@@ -437,7 +441,7 @@ def cli():
 
     # Skipping
     skip_build = args.skip_build
-    skip_publish = publish_github_token is None
+    skip_publish = args.skip_publish
 
     def _apidocs_display_report():
 
@@ -451,21 +455,22 @@ def cli():
             print("  * apidocs_src_dir .............: %s" % apidocs_src_dir)
             print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
 
-        print("\nApidocs publishing parameters")
-        print("  * repo_branch_or_tag ..........: %s" % _missing(slicer_repo_branch_or_tag))
-        print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
-        print("  * html_output_dir .............: %s" % html_output_dir)
-        print("  * username ....................: %s" % publish_github_username)
-        print("  * useremail ...................: %s" % publish_github_useremail)
-        print("  * repo_url ....................: %s" % publish_github_repo_url)
-        print("  * repo_name ...................: %s" % publish_github_repo_name)
-        print("  * repo_branch .................: %s" % publish_github_repo_branch)
-        print("  * github_token.................: %s" % _missing(_obfuscate(publish_github_token)))
-        print("  * skip_publish ................: %s" % skip_publish)
+        if not skip_publish:
+            print("\nApidocs publishing parameters")
+            print("  * repo_branch_or_tag ..........: %s" % _missing(slicer_repo_branch_or_tag))
+            print("  * apidocs_build_dir ...........: %s" % apidocs_build_dir)
+            print("  * html_output_dir .............: %s" % html_output_dir)
+            print("  * username ....................: %s" % publish_github_username)
+            print("  * useremail ...................: %s" % publish_github_useremail)
+            print("  * repo_url ....................: %s" % publish_github_repo_url)
+            print("  * repo_name ...................: %s" % publish_github_repo_name)
+            print("  * repo_branch .................: %s" % publish_github_repo_branch)
+            print("  * github_token.................: %s" % _missing(_obfuscate(publish_github_token)))
+            print("  * skip_publish ................: %s" % skip_publish)
 
     _apidocs_display_report()
 
-    if not publish_github_token or not slicer_repo_branch_or_tag:
+    if not slicer_repo_branch_or_tag or (not skip_publish and not publish_github_token):
         print("\nAborting: parameters are missing")
         return 1
 
@@ -480,37 +485,39 @@ def cli():
             slicer_repo_branch_or_tag=slicer_repo_branch_or_tag,
         )
 
-    # Set "<repo_name>@<ref>" for the commit message
-    with working_dir(slicer_repo_dir):
-        slicer_repo_head_sha = execute("git rev-parse HEAD", capture=True)
-        print("slicer_repo_head_sha: %s" % slicer_repo_head_sha)
+    if not skip_publish:
 
-        slicer_repo_sha_ref = "%s@%s" % (
-            slicer_repo_name, slicer_repo_tag if slicer_repo_tag else slicer_repo_head_sha[:8])
+        # Set "<repo_name>@<ref>" for the commit message
+        with working_dir(slicer_repo_dir):
+            slicer_repo_head_sha = execute("git rev-parse HEAD", capture=True)
+            print("slicer_repo_head_sha: %s" % slicer_repo_head_sha)
 
-    # Get subdirectory in which documentation should be pushed
-    publish_github_subdir = slicer_repo_branch_or_tag
-    if is_tag(slicer_repo_dir, slicer_repo_branch_or_tag):
-        publish_github_subdir = extract_apidocs_version_from_tag(slicer_repo_branch_or_tag)
+            slicer_repo_sha_ref = "%s@%s" % (
+                slicer_repo_name, slicer_repo_tag if slicer_repo_tag else slicer_repo_head_sha[:8])
 
-    with working_dir(apidocs_build_dir):
-        _apidocs_publish_doxygen(
-            html_output_dir=html_output_dir,
-            publish_github_repo_url=publish_github_repo_url,
-            publish_github_repo_name=publish_github_repo_name,
-            publish_github_repo_branch=publish_github_repo_branch,
-            publish_github_user_name=publish_github_username,
-            publish_github_user_email=publish_github_useremail,
-            publish_github_token=publish_github_token,
-            publish_github_subdir=publish_github_subdir,
-            slicer_repo_sha_ref=slicer_repo_sha_ref,
-            skip_publish=skip_publish,
-        )
+        # Get subdirectory in which documentation should be pushed
+        publish_github_subdir = slicer_repo_branch_or_tag
+        if is_tag(slicer_repo_dir, slicer_repo_branch_or_tag):
+            publish_github_subdir = extract_apidocs_version_from_tag(slicer_repo_branch_or_tag)
 
-    # Since building the doxygen documentation outputs a lot of text,
-    # for convenience let's display the report again.
-    if not skip_build:
-        _apidocs_display_report()
+        with working_dir(apidocs_build_dir):
+            _apidocs_publish_doxygen(
+                html_output_dir=html_output_dir,
+                publish_github_repo_url=publish_github_repo_url,
+                publish_github_repo_name=publish_github_repo_name,
+                publish_github_repo_branch=publish_github_repo_branch,
+                publish_github_user_name=publish_github_username,
+                publish_github_user_email=publish_github_useremail,
+                publish_github_token=publish_github_token,
+                publish_github_subdir=publish_github_subdir,
+                slicer_repo_sha_ref=slicer_repo_sha_ref,
+                skip_publish=skip_publish,
+            )
+
+        # Since building the doxygen documentation outputs a lot of text,
+        # for convenience let's display the report again.
+        if not skip_build:
+            _apidocs_display_report()
 
     return 0
 
