@@ -72,7 +72,8 @@ def _apidocs_build_doxygen(
         execute("git clone %s --branch %s --depth 1 %s" % (
             slicer_repo_clone_url, slicer_repo_branch_or_tag, slicer_repo_dir))
     else:
-        execute("git fetch origin")
+        with working_dir(slicer_repo_dir):
+            execute("git fetch origin")
 
     # Get reference
     slicer_repo_ref = "origin/" + slicer_repo_branch_or_tag
