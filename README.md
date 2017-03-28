@@ -159,6 +159,6 @@ Apidocs Publishing:
 
 It is covered by the Slicer License:
 
-https://github.com/slicer-apidocs-builder/License.txt
+https://github.com/Slicer/slicer-apidocs-builder/blob/master/License.txt
 
 
