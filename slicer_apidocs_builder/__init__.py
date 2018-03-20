@@ -245,8 +245,11 @@ def _apidocs_status_update(
         # Branch or tag ?
         target_url_path = status_update_branch_or_tag
         if repository_api and status_update_branch_or_tag:
-            if repository_api.ref("tags/" + status_update_branch_or_tag) is not None:
-                target_url_path = extract_apidocs_version_from_tag(status_update_branch_or_tag)
+            try:
+                if repository_api.ref("tags/" + status_update_branch_or_tag) is not None:
+                    target_url_path = extract_apidocs_version_from_tag(status_update_branch_or_tag)
+            except github3.exceptions.NotFoundError:
+                pass
 
         status_update_target_url += "/%s" % target_url_path
 
