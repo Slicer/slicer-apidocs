@@ -25,11 +25,13 @@ def extract_slicer_xy_version(slicer_src_dir):
                    for part in ["major", "minor"]}
     parts = {}
     with open(slicer_src_dir + "/CMakeLists.txt") as fp:
-        for line in fp.readlines(50):
+        for line in fp:
             for part, expression in expressions.items():
                 m = expression.match(line.strip())
                 if m is not None:
                     parts[part] = m.group(1)
+            if len(parts) == len(expressions):
+              break
     return "{major}.{minor}".format(**parts) if parts else None
 
 
