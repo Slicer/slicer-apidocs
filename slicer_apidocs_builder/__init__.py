@@ -429,7 +429,7 @@ def cli():
         return 0
 
     # apidocs building parameters
-    slicer_repo_clone_url = "git://github.com/%s" % args.slicer_repo_name
+    slicer_repo_clone_url = "https://github.com/%s" % args.slicer_repo_name
 
     # Apidocs directories
     apidocs_src_dir = root_dir + "/" + "%s-src" % directory
@@ -441,7 +441,7 @@ def cli():
     publish_github_useremail = args.publish_github_useremail
     publish_github_repo_name = args.publish_github_repo_name
     publish_github_repo_branch = args.publish_github_repo_branch
-    publish_github_repo_url = "git://github.com/" + publish_github_repo_name
+    publish_github_repo_url = "https://github.com/" + publish_github_repo_name
     publish_github_token = args.publish_github_token
 
     # Skipping
