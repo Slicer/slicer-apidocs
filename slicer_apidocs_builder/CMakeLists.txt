@@ -12,6 +12,8 @@ foreach(var IN ITEMS
   endif()
 endforeach()
 
+find_package(Doxygen REQUIRED dot)
+
 set(Slicer_BINARY_DIR ${CMAKE_BINARY_DIR})
 
 ###
