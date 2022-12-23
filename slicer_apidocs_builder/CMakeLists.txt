@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.7)
 
+project(SlicerDoxygenBuilder)
+
 # Sanity checks
 foreach(var IN ITEMS
   Slicer_VERSION
