@@ -1,9 +1,0 @@
-include License.txt
-include MANIFEST.in
-include README.md
-include requirements.txt
-
-include slicer_apidocs_builder/CMakeLists.txt
-
-recursive-exclude * __pycache__
-recursive-exclude * *.py[co]

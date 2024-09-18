@@ -15,6 +15,8 @@ import github3
 
 from .utils import execute, mkdir_p, working_dir
 
+__version__ = "0.1.0"
+
 
 def extract_slicer_xy_version(slicer_src_dir):
     """Given a Slicer source director, extract <major>.<minor> version
