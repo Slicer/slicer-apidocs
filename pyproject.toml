@@ -1,0 +1,42 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "slicer-apidocs-builder"
+dynamic = ["version"]
+description = "slicer-apidocs-builder allows to generate and publish the Slicer API documentation."
+readme = "README.md"
+license = { file = "License.txt" }
+authors = [
+    { name = "Jean-Christophe Fillion-Robin", email = "jchris.fillionr@kitware.com" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Documentation",
+]
+dependencies = [
+    "cmake",
+    "github3.py",
+    "python-dateutil",
+]
+
+[project.scripts]
+slicer-apidocs-builder = "slicer_apidocs_builder:main"
+
+[project.urls]
+Homepage = "http://apidocs.slicer.org"
+
+[tool.hatch.version]
+path = "slicer_apidocs_builder/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/slicer_apidocs_builder",
+    "/License.txt",
+]
