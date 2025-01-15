@@ -19,12 +19,12 @@ where X and Y respectively correspond to Slicer major and minor version.
 
 A new subpage is automatically created after each release.
 
-## master
+## main
 
-API documentation associated with the [Slicer/Slicer@master](https://github.com/Slicer/Slicer/tree/master)
-branch is available under the `master` subpage.
+API documentation associated with the [Slicer/Slicer@main](https://github.com/Slicer/Slicer/tree/main)
+branch is available under the `main` subpage.
 
-The `master` subpage is automatically updated each time the corresponding GitHub branch is updated.
+The `main` subpage is automatically updated each time the corresponding GitHub branch is updated.
 
 ## pull requests
 

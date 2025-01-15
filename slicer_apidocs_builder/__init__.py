@@ -318,7 +318,7 @@ def cli():
     )
     build_group.add_argument(
         "--slicer-repo-branch", type=str,
-        help="Slicer branch to document (example: master)"
+        help="Slicer branch to document (example: main)"
     )
     build_group.add_argument(
         "--slicer-repo-tag", type=str,
