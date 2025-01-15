@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
 
 project(SlicerDoxygenBuilder)
 
