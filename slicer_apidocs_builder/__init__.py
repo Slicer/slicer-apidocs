@@ -110,6 +110,7 @@ def _apidocs_build_doxygen(
 
 def _apidocs_publish_doxygen(
         html_output_dir=None,
+        publish_github_repo_dir=None,
         publish_github_repo_url=None,
         publish_github_repo_name=None,
         publish_github_repo_branch=None,
@@ -122,8 +123,10 @@ def _apidocs_publish_doxygen(
         skip_publish=False,
 ):
     assert html_output_dir
-    assert publish_github_repo_url
-    assert publish_github_repo_name
+    if publish_github_repo_dir is None:
+        assert publish_github_repo_url
+    if publish_github_repo_dir is not None or not publish_github_skip_auth:
+        assert publish_github_repo_name
     assert publish_github_repo_branch
     assert publish_github_user_name
     assert publish_github_user_email
@@ -133,22 +136,26 @@ def _apidocs_publish_doxygen(
     assert slicer_repo_sha_ref
 
     # Checkout publishing repo
-    if not os.path.exists("apidocs"):
+    if publish_github_repo_dir is None:
+        publish_github_repo_dir = "apidocs"
+
+    if not os.path.exists(publish_github_repo_dir):
         try:
-            execute("git clone --branch %s --depth 1 %s apidocs" % (
-                publish_github_repo_branch, publish_github_repo_url), capture=True)
+            execute(
+                f"git clone --branch {publish_github_repo_branch} --depth 1 {publish_github_repo_url} {publish_github_repo_dir}",
+                capture=True)
         except subprocess.CalledProcessError as exc_info:
             msg = "Remote branch %s not found in upstream origin" % publish_github_repo_branch
             if msg not in exc_info.output:
                 raise
             # Create orphan branch
-            execute("git clone %s apidocs" % publish_github_repo_url)
-            with working_dir("apidocs"):
+            execute(f"git clone {publish_github_repo_url} {publish_github_repo_dir}")
+            with working_dir(publish_github_repo_dir):
                 execute("git symbolic-ref HEAD refs/heads/%s" % publish_github_repo_branch)
                 os.remove(".git/index")
                 execute("git clean -fdx")
 
-    with working_dir("apidocs"):
+    with working_dir(publish_github_repo_dir):
 
         # Setup user.name and user.email
         execute("git config user.email '%s'" % publish_github_user_email)
@@ -350,6 +357,11 @@ def cli():
         help="Github email to associate with the commits (default: slicerbot@slicer.org)"
     )
     publish_group.add_argument(
+        "--publish-github-repo-dir", type=str,
+        help="Existing checkout of repository hosting generated HTML documentation. "
+             "(default: automatically cloned based on --publish-github-repo-name)"
+    )
+    publish_group.add_argument(
         "--publish-github-repo-name", type=str, default="slicer/apidocs.slicer.org",
         help="Github repository hosting generated HTML documentation "
              "(default: slicer/apidocs.slicer.org)"
@@ -456,6 +468,7 @@ def cli():
     # apidocs publishing
     publish_github_username = args.publish_github_username
     publish_github_useremail = args.publish_github_useremail
+    publish_github_repo_dir = args.publish_github_repo_dir
     publish_github_repo_name = args.publish_github_repo_name
     publish_github_repo_branch = args.publish_github_repo_branch
     publish_github_repo_url = "https://github.com/" + publish_github_repo_name
@@ -485,6 +498,7 @@ def cli():
             print("  * html_output_dir .............: %s" % html_output_dir)
             print("  * username ....................: %s" % publish_github_username)
             print("  * useremail ...................: %s" % publish_github_useremail)
+            print("  * repo_dir ....................: %s" % publish_github_repo_dir)
             print("  * repo_url ....................: %s" % publish_github_repo_url)
             print("  * repo_name ...................: %s" % publish_github_repo_name)
             print("  * repo_branch .................: %s" % publish_github_repo_branch)
@@ -531,6 +545,7 @@ def cli():
         with working_dir(apidocs_build_dir):
             _apidocs_publish_doxygen(
                 html_output_dir=html_output_dir,
+                publish_github_repo_dir=publish_github_repo_dir,
                 publish_github_repo_url=publish_github_repo_url,
                 publish_github_repo_name=publish_github_repo_name,
                 publish_github_repo_branch=publish_github_repo_branch,

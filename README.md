@@ -42,6 +42,7 @@ usage: slicer-apidocs-builder [-h] [--slicer-repo-name SLICER_REPO_NAME]
                               [--skip-build]
                               [--publish-github-username PUBLISH_GITHUB_USERNAME]
                               [--publish-github-useremail PUBLISH_GITHUB_USEREMAIL]
+                              [--publish-github-repo-dir PUBLISH_GITHUB_REPO_DIR]
                               [--publish-github-repo-name PUBLISH_GITHUB_REPO_NAME]
                               [--publish-github-repo-branch PUBLISH_GITHUB_REPO_BRANCH]
                               [--publish-github-token PUBLISH_GITHUB_TOKEN]
@@ -79,6 +80,9 @@ Apidocs Publishing:
   --publish-github-useremail PUBLISH_GITHUB_USEREMAIL
                         Github email to associate with the commits (default:
                         slicerbot@slicer.org)
+  --publish-github-repo-dir PUBLISH_GITHUB_REPO_DIR
+                        Existing checkout of repository hosting generated HTML documentation.
+                        (default: automatically cloned based on --publish-github-repo-name)
   --publish-github-repo-name PUBLISH_GITHUB_REPO_NAME
                         Github repository hosting generated HTML documentation
                         (default: slicer/apidocs.slicer.org)
