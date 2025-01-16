@@ -116,6 +116,7 @@ def _apidocs_publish_doxygen(
         publish_github_user_name=None,
         publish_github_user_email=None,
         publish_github_token=None,
+        publish_github_skip_auth=False,
         publish_github_subdir=None,
         slicer_repo_sha_ref=None,
         skip_publish=False,
@@ -126,7 +127,8 @@ def _apidocs_publish_doxygen(
     assert publish_github_repo_branch
     assert publish_github_user_name
     assert publish_github_user_email
-    assert publish_github_token
+    if not publish_github_skip_auth:
+        assert publish_github_token
     assert publish_github_subdir
     assert slicer_repo_sha_ref
 
@@ -186,6 +188,11 @@ def _apidocs_publish_doxygen(
         # Publish
         if skip_publish:
             return
+
+        if publish_github_skip_auth:
+            execute("git push origin %s" % publish_github_repo_branch)
+            return
+
         xxx_token = len(publish_github_token) * "X"
         publish_github_push_url = "https://%s@github.com/%s" % (
             xxx_token, publish_github_repo_name)
@@ -212,6 +219,10 @@ def _gh_repository_api(repo_name, github_token):
 
 def _missing(value):
     return value if value else "(missing)"
+
+
+def _skipped(value, skipped=False):
+    return value if not skipped else "(skipped)"
 
 
 def _obfuscate(value):
@@ -354,6 +365,10 @@ def cli():
              "(default: PUBLISH_GITHUB_TOKEN env. variable)"
     )
     publish_group.add_argument(
+        "--publish-github-skip-auth", action="store_true",
+        help="If specified, attempt to publish without token."
+    )
+    publish_group.add_argument(
         "--skip-publish", action="store_true",
         help="If specified, skip publication of HTML files."
     )
@@ -445,6 +460,7 @@ def cli():
     publish_github_repo_branch = args.publish_github_repo_branch
     publish_github_repo_url = "https://github.com/" + publish_github_repo_name
     publish_github_token = args.publish_github_token
+    publish_github_skip_auth = args.publish_github_skip_auth
 
     # Skipping
     skip_build = args.skip_build
@@ -472,13 +488,18 @@ def cli():
             print("  * repo_url ....................: %s" % publish_github_repo_url)
             print("  * repo_name ...................: %s" % publish_github_repo_name)
             print("  * repo_branch .................: %s" % publish_github_repo_branch)
-            print("  * github_token.................: %s" % _missing(_obfuscate(publish_github_token)))
+            print("  * github_token.................: %s" % _missing(
+                _skipped(_obfuscate(publish_github_token), skipped=publish_github_skip_auth)))
             print("  * skip_publish ................: %s" % skip_publish)
 
     _apidocs_display_report()
 
-    if not slicer_repo_branch_or_tag or (not skip_publish and not publish_github_token):
-        print("\nAborting: parameters are missing")
+    if not slicer_repo_branch_or_tag:
+        print("\nAborting: parameters are missing. Specify --slicer-repo-branch and/or --slicer-repo-tag")
+        return 1
+
+    if not skip_publish and not publish_github_skip_auth and not publish_github_token:
+        print("\nAborting: parameters are missing. Specify --publish-github-token or --publish-skip-github-auth")
         return 1
 
     if not skip_build:
@@ -516,6 +537,7 @@ def cli():
                 publish_github_user_name=publish_github_username,
                 publish_github_user_email=publish_github_useremail,
                 publish_github_token=publish_github_token,
+                publish_github_skip_auth=publish_github_skip_auth,
                 publish_github_subdir=publish_github_subdir,
                 slicer_repo_sha_ref=slicer_repo_sha_ref,
                 skip_publish=skip_publish,
